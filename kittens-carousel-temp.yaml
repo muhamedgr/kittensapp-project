@@ -22,7 +22,19 @@ Resources:
       ImageId: !Ref LatestAmiId
       Tags:
         - Key: Name
-          Value: Web Server of StackName
+          Value: !Sub Web Server of ${AWS::StackName}
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          yum update -y
+          yum install -y httpd wget
+          cd /var/www/html
+          wget https://raw.githubusercontent.com/muhamedgr/kittensapp-project/main/static-web/index.html
+          wget https://raw.githubusercontent.com/muhamedgr/kittensapp-project/main/static-web/cat0.jpg
+          wget https://raw.githubusercontent.com/muhamedgr/kittensapp-project/main/static-web/cat1.jpg
+          wget https://raw.githubusercontent.com/muhamedgr/kittensapp-project/main/static-web/cat2.jpg
+          systemctl start httpd
+          systemctl enable httpd
 
 
   MySG:
@@ -39,7 +51,12 @@ Resources:
           IpProtocol: tcp
           ToPort: 80
 
-
-
 Outputs:
+  KittensCarouselURL:
+    Description: Application URL
+    Value:
+      Fn::Join:
+        - ''
+        - - 'http://'
+          - !GetAtt MyEC2Instance.PublicDnsName
  
